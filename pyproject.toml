@@ -1,0 +1,6 @@
+[project]
+name = "fastapi-udemy"
+version = "0.1.0"
+description = "FastAPI Udemy Course"
+requires-python = ">=3.13"
+dependencies = []
