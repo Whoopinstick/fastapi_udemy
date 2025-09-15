@@ -22,12 +22,37 @@ async def greet_user(user: str):
     return {"data": f"Hello, {user}"}
 
 @app.get("/books")
-async def get_books():
-    return BOOKS
+async def get_books(category: str = "all"):
+    if category.lower() == "all":
+        return BOOKS
+    else:
+        books_to_return = []
+        for book in BOOKS:
+            if category.lower() == book["category"].lower():
+                books_to_return.append(book)
 
-@app.get("/books/{book_id}")
-async def get_book_by_id(book_id: int):
-    return BOOKS[book_id]
+        if not books_to_return:
+            return "no results"
+        else:
+            return books_to_return
+
+@app.get("/books/{book_title}")
+async def get_book_by_title(book_title: str, category: str = "all"):
+    if category.lower() == "all":
+        for book in BOOKS:
+            if book_title.lower() == book["title"].lower():
+                return book
+            else:
+                return "no results"
+    else:
+        for book in BOOKS:
+            if book_title.lower() == book["title"].lower() and category.lower() == book["category"].lower():
+                return book
+            else:
+                return "no results"
+
+    return "no results"
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
