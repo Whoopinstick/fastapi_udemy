@@ -53,6 +53,12 @@ async def get_book_by_title(book_title: str, category: str = "all"):
 
     return "no results"
 
+@app.post("/books")
+async def insert_book(title: str, author: str, category: str):
+    new_book = {"title": title, "author": author, "category": category}
+    BOOKS.append(new_book)
+    return new_book
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
