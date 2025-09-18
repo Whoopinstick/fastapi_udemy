@@ -1,3 +1,5 @@
+from os.path import defpath
+
 from fastapi import FastAPI
 import uvicorn
 from pydantic import BaseModel
@@ -75,6 +77,36 @@ async def insert_book(new_book: Book):
     book_to_insert = {"title": new_book.title, "author": new_book.author, "category": new_book.category}
     BOOKS.append(book_to_insert)
     return new_book
+
+@app.put("/books/{book_title}")
+async def update_book(book_title: str, updated_book: Book):
+    for book in BOOKS:
+        if book_title.lower() == book["title"].lower():
+            book["title"] = updated_book.title
+            book["author"] = updated_book.author
+            book["category"] = updated_book.category
+            return book
+        else:
+            continue
+    return "no results"
+
+'''
+    if category.lower() == "all":
+        for book in BOOKS:
+            if book_title.lower() == book["title"].lower():
+                return book
+            else:
+                return "no results"
+    else:
+        for book in BOOKS:
+            if book_title.lower() == book["title"].lower() and category.lower() == book["category"].lower():
+                return book
+            else:
+                return "no results"
+
+    return "no results"
+'''
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
