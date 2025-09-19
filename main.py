@@ -1,5 +1,3 @@
-from os.path import defpath
-
 from fastapi import FastAPI
 import uvicorn
 from pydantic import BaseModel
@@ -90,22 +88,14 @@ async def update_book(book_title: str, updated_book: Book):
             continue
     return "no results"
 
-'''
-    if category.lower() == "all":
-        for book in BOOKS:
-            if book_title.lower() == book["title"].lower():
-                return book
-            else:
-                return "no results"
-    else:
-        for book in BOOKS:
-            if book_title.lower() == book["title"].lower() and category.lower() == book["category"].lower():
-                return book
-            else:
-                return "no results"
+@app.delete("/books/{book_title}")
+async def delete_book(book_title: str):
+    for book in BOOKS:
+        if book_title.lower() == book["title"].lower():
+            BOOKS.remove(book)
+            return "book deleted"
 
     return "no results"
-'''
 
 
 if __name__ == "__main__":
