@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 import uvicorn
 from pydantic import BaseModel, Field
@@ -5,8 +7,8 @@ from pydantic import BaseModel, Field
 app = FastAPI()
 
 class Book:
-    def __init__(self, id: int, title: str, author: str, description: str, rating: int):
-        self.id = id
+    def __init__(self, book_id: int, title: str, author: str, description: str, rating: int):
+        self.book_id = book_id
         self.title = title
         self.author = author
         self.description = description
@@ -14,19 +16,35 @@ class Book:
 
 
 class BookRequest(BaseModel):
-    id: int
-    title: str
-    author: str
-    description: str | None = ""
+    book_id: Optional[int] = Field(description="System will auto-assign", default=None)
+    title: str = Field(min_length=3)
+    author: str = Field(min_length=1)
+    description: str = Field(min_length=1, max_length=100)
     rating: int = Field(gt=0, le=5)
 
+    # update the pydantic example
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "title": "My New Book",
+                "author": "Kevin Paul",
+                "description": "My new book covers various topics",
+                "rating": 5
+            }
+        }
+    }
 
 
-BOOKS = [Book(id=1, title="First Book", author="First Author", description="The First Book Written!", rating=5),
-        Book(id=2, title="Second Book", author="Second Author", description="The Second Book Written!", rating=4),
-        Book(id=3, title="Third Book", author="First Author", description="Another book", rating=3),
-        Book(id=4, title="Fourth Book", author="Third Author", description="A book about cool stuff", rating=5)
+
+BOOKS = [Book(book_id=1, title="First Book", author="First Author", description="The First Book Written!", rating=5),
+        Book(book_id=2, title="Second Book", author="Second Author", description="The Second Book Written!", rating=4),
+        Book(book_id=3, title="Third Book", author="First Author", description="Another book", rating=3),
+        Book(book_id=4, title="Fourth Book", author="Third Author", description="A book about cool stuff", rating=5)
          ]
+
+def get_next_book_id(book: Book):
+    book.book_id = 1 if len(BOOKS) == 0 else BOOKS[-1].book_id + 1
+    return book
 
 
 @app.get("/books")
@@ -37,7 +55,8 @@ async def get_books():
 @app.post("/books")
 async def create_book(book_request: BookRequest):
     new_book = Book(**book_request.model_dump())
-    BOOKS.append(new_book)
+    # BOOKS.append(new_book)
+    BOOKS.append(get_next_book_id(new_book))
     return {"data": new_book}
 
 
