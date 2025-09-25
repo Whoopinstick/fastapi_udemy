@@ -47,9 +47,28 @@ def get_next_book_id(book: Book):
     return book
 
 
+# @app.get("/books")
+# async def get_books():
+#     return BOOKS
+
 @app.get("/books")
-async def get_books():
-    return BOOKS
+async def get_books(book_rating: int = -1):
+    books_to_return = []
+    if book_rating == -1:
+        return BOOKS
+    else:
+        for book in BOOKS:
+            if book.rating == book_rating:
+                books_to_return.append(book)
+        return books_to_return
+
+
+@app.get("/books/{book_id}")
+async def get_book_by_id(book_id: int):
+    for book in BOOKS:
+        if book.book_id == book_id:
+            return book
+    return "No results found"
 
 
 @app.post("/books")
@@ -60,6 +79,17 @@ async def create_book(book_request: BookRequest):
     return {"data": new_book}
 
 
+@app.put("/books/{book_id}")
+async def update_book_by_id(book_id: int, book_request: BookRequest):
+    updated_book = Book(**book_request.model_dump())
+    for book in BOOKS:
+        if book.book_id == book_id:
+            book.title = updated_book.title
+            book.author = updated_book.author
+            book.description = updated_book.description
+            book.rating = updated_book.rating
+        return book
+    return "No results found"
 
 
 if __name__ == "__main__":
