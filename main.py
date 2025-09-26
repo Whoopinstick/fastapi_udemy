@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Query, HTTPException, status
 import uvicorn
 from pydantic import BaseModel, Field
 from datetime import datetime
@@ -59,8 +59,11 @@ def get_next_book_id(book: Book):
 # async def get_books():
 #     return BOOKS
 
-@app.get("/books")
-async def get_books(book_rating: int = None, published_year: int = None):
+@app.get("/books", status_code=status.HTTP_200_OK)
+async def get_books(book_rating: int = Query(gt=0, le=5, default=None,
+                                             description="Leave blank for ALL, or filter for a value between 1 and 5 inclusive")
+                    ,published_year: int = Query(gt=0, le=datetime.now().year, default=None,
+                                                 description=f"Leave blank for ALL, or filter for a value between 0 and {datetime.now().year} inclusive")):
     books_to_return = []
     if not book_rating and not published_year:
         return BOOKS
@@ -69,42 +72,40 @@ async def get_books(book_rating: int = None, published_year: int = None):
             for book in BOOKS:
                 if book.rating == book_rating:
                     books_to_return.append(book)
-            return books_to_return
 
         elif published_year and not book_rating:
             for book in BOOKS:
                 if book.published_year == published_year:
                     books_to_return.append(book)
-            return books_to_return
 
         else:
             for book in BOOKS:
                 if book.rating == book_rating and book.published_year == published_year:
                     books_to_return.append(book)
-            return books_to_return
+
+    if len(books_to_return) > 0:
+        return books_to_return
+    else:
+        raise HTTPException(status_code=404, detail="No books found")
 
 
-        # return books_to_return
-
-
-@app.get("/books/{book_id}")
-async def get_book_by_id(book_id: int):
+@app.get("/books/{book_id}",status_code=status.HTTP_200_OK)
+async def get_book_by_id(book_id: int = Path(gt=0)):
     for book in BOOKS:
         if book.book_id == book_id:
             return book
-    return "No results found"
+    raise HTTPException(status_code=404, detail="No book found")
 
 
-@app.post("/books")
+@app.post("/books",status_code=status.HTTP_201_CREATED)
 async def create_book(book_request: BookRequest):
     new_book = Book(**book_request.model_dump())
-    # BOOKS.append(new_book)
     BOOKS.append(get_next_book_id(new_book))
     return {"data": new_book}
 
 
-@app.put("/books/{book_id}")
-async def update_book_by_id(book_id: int, book_request: BookRequest):
+@app.put("/books/{book_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def update_book_by_id(book_request: BookRequest, book_id: int = Path(gt=0)):
     updated_book = Book(**book_request.model_dump())
     for book in BOOKS:
         if book.book_id == book_id:
@@ -113,14 +114,15 @@ async def update_book_by_id(book_id: int, book_request: BookRequest):
             book.description = updated_book.description
             book.rating = updated_book.rating
         return book
-    return "No results found"
+    raise HTTPException(status_code=404,detail="No results found")
 
-@app.delete("/books/{book_id}")
-async def delete_book_by_id(book_id: int):
+@app.delete("/books/{book_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_book_by_id(book_id: int = Path(gt=0)):
     for index, book in enumerate(BOOKS):
         if book.book_id == book_id:
             BOOKS.pop(index)
-            break
+            return
+    raise HTTPException(status_code=404, detail="No results found")
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
