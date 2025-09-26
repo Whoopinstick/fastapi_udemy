@@ -91,6 +91,12 @@ async def update_book_by_id(book_id: int, book_request: BookRequest):
         return book
     return "No results found"
 
+@app.delete("/books/{book_id}")
+async def delete_book_by_id(book_id: int):
+    for index, book in enumerate(BOOKS):
+        if book.book_id == book_id:
+            BOOKS.pop(index)
+            break
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
