@@ -3,16 +3,18 @@ from typing import Optional
 from fastapi import FastAPI
 import uvicorn
 from pydantic import BaseModel, Field
+from datetime import datetime
 
 app = FastAPI()
 
 class Book:
-    def __init__(self, book_id: int, title: str, author: str, description: str, rating: int):
+    def __init__(self, book_id: int, title: str, author: str, description: str, rating: int, published_year: int):
         self.book_id = book_id
         self.title = title
         self.author = author
         self.description = description
         self.rating = rating
+        self.published_year = published_year
 
 
 class BookRequest(BaseModel):
@@ -21,6 +23,7 @@ class BookRequest(BaseModel):
     author: str = Field(min_length=1)
     description: str = Field(min_length=1, max_length=100)
     rating: int = Field(gt=0, le=5)
+    published_year: int = Field(gt=0, le=datetime.now().year)
 
     # update the pydantic example
     model_config = {
@@ -29,17 +32,22 @@ class BookRequest(BaseModel):
                 "title": "My New Book",
                 "author": "Kevin Paul",
                 "description": "My new book covers various topics",
-                "rating": 5
+                "rating": 5,
+                "published_year": datetime.now().year
             }
         }
     }
 
 
 
-BOOKS = [Book(book_id=1, title="First Book", author="First Author", description="The First Book Written!", rating=5),
-        Book(book_id=2, title="Second Book", author="Second Author", description="The Second Book Written!", rating=4),
-        Book(book_id=3, title="Third Book", author="First Author", description="Another book", rating=3),
-        Book(book_id=4, title="Fourth Book", author="Third Author", description="A book about cool stuff", rating=5)
+BOOKS = [Book(book_id=1, title="First Book", author="First Author", description="The First Book Written!", rating=5,
+              published_year=1990),
+        Book(book_id=2, title="Second Book", author="Second Author", description="The Second Book Written!", rating=4,
+             published_year=2000),
+        Book(book_id=3, title="Third Book", author="First Author", description="Another book", rating=3,
+             published_year=2023),
+        Book(book_id=4, title="Fourth Book", author="Third Author", description="A book about cool stuff", rating=5,
+             published_year=2010)
          ]
 
 def get_next_book_id(book: Book):
@@ -52,15 +60,31 @@ def get_next_book_id(book: Book):
 #     return BOOKS
 
 @app.get("/books")
-async def get_books(book_rating: int = -1):
+async def get_books(book_rating: int = None, published_year: int = None):
     books_to_return = []
-    if book_rating == -1:
+    if not book_rating and not published_year:
         return BOOKS
     else:
-        for book in BOOKS:
-            if book.rating == book_rating:
-                books_to_return.append(book)
-        return books_to_return
+        if book_rating and not published_year:
+            for book in BOOKS:
+                if book.rating == book_rating:
+                    books_to_return.append(book)
+            return books_to_return
+
+        elif published_year and not book_rating:
+            for book in BOOKS:
+                if book.published_year == published_year:
+                    books_to_return.append(book)
+            return books_to_return
+
+        else:
+            for book in BOOKS:
+                if book.rating == book_rating and book.published_year == published_year:
+                    books_to_return.append(book)
+            return books_to_return
+
+
+        # return books_to_return
 
 
 @app.get("/books/{book_id}")
