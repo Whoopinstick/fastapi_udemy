@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, Path, status
 from typing import Annotated
 import uvicorn
-import models
-from database import engine, SessionLocal
+from todo.database import engine, SessionLocal, Base
 from sqlalchemy.orm import Session
-from models import Todos
-from schemas import TodoRequest
+from todo.models import Todos
+from todo.schemas import TodoRequest
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
