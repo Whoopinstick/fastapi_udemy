@@ -2,8 +2,6 @@ import uvicorn
 from fastapi import FastAPI
 from todo.database import engine, Base
 from todo.routers import todo_router, auth_router
-# from todo.models
-
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
