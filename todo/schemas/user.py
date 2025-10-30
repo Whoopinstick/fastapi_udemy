@@ -8,3 +8,7 @@ class CreateUserRequest(BaseModel):
     password: str
     role: str
     is_active: bool = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
