@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from todo.models import Users
 from todo.schemas import CreateUserRequest, Token
 from todo.utils import hash_password, verify_password
@@ -6,18 +6,9 @@ from todo.database import get_db
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
-import jwt
-from jwt.exceptions import InvalidTokenError
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
+from todo.oath2 import create_access_token
 
-SECRET_KEY = 'MySuperSecretTemporaryToken'
-ALGORITHM = 'HS256'
-
-def create_access_token(username: str, user_id: int, expires_delta: timedelta):
-    encode = {'sub': username, 'id': user_id}
-    expires = datetime.now(timezone.utc) + expires_delta
-    encode.update({'exp': expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -29,6 +20,7 @@ def authenticate_user(username: str, password: str, db: db_dependency):
         return False
     return user
 
+# TODO: add prefix and tags, change paths in each route
 router = APIRouter()
 
 @router.get("/auth")
@@ -65,7 +57,7 @@ async def create_user(db: db_dependency, user: CreateUserRequest):
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        return "Failed Authentication"
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user.")
     token = create_access_token(user.username, user.id, timedelta(minutes=20))
 
     return {'access_token': token, 'token_type': 'bearer'}

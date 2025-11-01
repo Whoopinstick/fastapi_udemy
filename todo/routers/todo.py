@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+# TODO: add prefix and tags, change paths in each route
 router = APIRouter()
 
 @router.get("/todos", status_code=status.HTTP_200_OK)
