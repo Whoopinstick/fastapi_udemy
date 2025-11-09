@@ -20,15 +20,14 @@ def authenticate_user(username: str, password: str, db: db_dependency):
         return False
     return user
 
-# TODO: add prefix and tags, change paths in each route
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.get("/auth")
+@router.get("")
 async def get_user():
     return {'user': 'authenticated'}
 
 # TODO: check if email or username already exists
-@router.post("/auth", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, user: CreateUserRequest):
 
     hashed_pwd = hash_password(user.password)

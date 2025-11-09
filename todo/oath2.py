@@ -8,8 +8,8 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 
 crypto_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-# TODO: change this Url when the router prefix is added
-oath2_bearer = OAuth2PasswordBearer(tokenUrl='token')
+
+oath2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 SECRET_KEY = 'Pass!234567890asdf;lkajsdf;lkasjdf;lkajdsfqwpeoriufk,h'
 ALGORITHM = 'HS256'
@@ -19,6 +19,7 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
     expires = datetime.now(timezone.utc) + expires_delta
     encode.update({'exp': expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def get_current_user(token: Annotated[str, Depends(oath2_bearer)]):
     try:
