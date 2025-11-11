@@ -5,6 +5,7 @@ description = "FastAPI Udemy Course"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "alembic>=1.17.1",
     "bcrypt==4.3.0",
     "fastapi>=0.116.1",
     "passlib>=1.7.4",
