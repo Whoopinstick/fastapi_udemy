@@ -1,12 +1,14 @@
 import uvicorn
 from fastapi import FastAPI
 from todo.database import engine, Base
-from todo.routers import todo_router, auth_router
+from todo.routers import todo_router, auth_router, admin_router
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.include_router(todo_router)
 app.include_router(auth_router)
+
+app.include_router(admin_router)
 
 @app.get("/")
 def get_root():
