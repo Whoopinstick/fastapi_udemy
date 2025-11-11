@@ -9,6 +9,16 @@ class CreateUserRequest(BaseModel):
     role: str
     is_active: bool = True
 
+
+class GetUserRequest(BaseModel):
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    role: str
+    is_active: bool = True
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
