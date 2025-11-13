@@ -1,1 +1,16 @@
-Generic single-database configuration.
+# Migration scripts -
+# add users table
+# add todos table
+# add owner_id to users table, and add FK link to todos table
+# add phone_number to users table
+
+
+# application changes -
+# removed Base.metadata.create_all(bind=engine) from main.py
+# alembic will be used for all database migrations and table creations
+
+
+# TODO: swap bind engine for alembic on startup
+# main
+# remove Base.metadata.create_all(bind=engine)
+# add alembic to app startup instead

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 
 class CreateUserRequest(BaseModel):
     username: str
@@ -8,6 +9,7 @@ class CreateUserRequest(BaseModel):
     password: str
     role: str
     is_active: bool = True
+    phone_number: Optional[str]
 
 
 class GetUserRequest(BaseModel):
