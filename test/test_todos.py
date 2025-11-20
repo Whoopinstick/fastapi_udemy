@@ -85,5 +85,36 @@ def test_create_todo_authenticated(test_todo):
     assert model.priority == request_data.get('priority')
     assert model.complete == request_data.get('complete')
 
+def test_update_todo_authenticated(test_todo):
+    request_data = {
+        'complete': False, 'description': 'updated todo', "priority": 3, "title": "todo change"
+    }
 
+    response = client.put("/todos/1", json=request_data)
 
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    db = TestingSessionLocal()
+    model = db.query(Todos).filter(Todos.id == 1).first()
+    assert model.title == request_data.get('title')
+    assert model.description == request_data.get('description')
+    assert model.priority == request_data.get('priority')
+    assert model.complete == request_data.get('complete')
+
+def test_update_todo_not_found_authenticated(test_todo):
+    request_data = {
+        'complete': False, 'description': 'updated todo', "priority": 3, "title": "todo change"
+    }
+
+    response = client.put("/todos/999", json=request_data)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Todo not found"}
+
+def test_delete_todo_authenticated(test_todo):
+    response = client.delete("/todos/1")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    db = TestingSessionLocal()
+    model = db.query(Todos).filter(Todos.id == 1).first()
+    assert model is None
