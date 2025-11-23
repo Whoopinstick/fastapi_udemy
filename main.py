@@ -3,15 +3,18 @@ from fastapi import FastAPI, Request
 from todo.database import engine, Base
 from todo.routers import todo_router, auth_router, admin_router, user_router
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 Base.metadata.create_all(bind=engine)
 
-templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 app.include_router(todo_router)
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(user_router)
+
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 def get_root():
