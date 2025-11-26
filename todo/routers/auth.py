@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
+from fastapi.templating import Jinja2Templates
 from todo.models import Users
 from todo.schemas import CreateUserRequest, Token
 from todo.utils import hash_password, verify_password
@@ -12,6 +13,9 @@ from todo.oath2 import create_access_token
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
+templates = Jinja2Templates(directory="templates")
+
+
 def authenticate_user(username: str, password: str, db: db_dependency):
     user = db.query(Users).filter(Users.username == username).first()
     if not user:
@@ -22,6 +26,20 @@ def authenticate_user(username: str, password: str, db: db_dependency):
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+
+
+
+
+### Pages ###
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@router.get("/register-page")
+def render_register_page(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+### Endpoints ###
 @router.get("")
 async def get_user():
     return {'user': 'authenticated'}
