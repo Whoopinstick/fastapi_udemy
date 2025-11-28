@@ -1,5 +1,6 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from fastapi.responses import RedirectResponse
 from todo.database import engine, Base
 from todo.routers import todo_router, auth_router, admin_router, user_router
 from fastapi.templating import Jinja2Templates
@@ -18,7 +19,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 def get_root():
-    return {"Hello": "Todos"}
+    # return {"Hello": "Todos"}
+    return RedirectResponse(url="/todos/todo-page", status_code=status.HTTP_302_FOUND)
 
 @app.get("/template_test")
 def template_test(request: Request):
